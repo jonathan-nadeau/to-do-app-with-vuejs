@@ -1,12 +1,25 @@
-# to-do-app-with-vuejs
+# To-do App with Vue.js
 
-This template should help get you started developing with Vue 3 in Vite.
+This app is using [Vue.js](https://vuejs.org/)
 
-## Recommended IDE Setup
+## Development
+
+#### Setup environment variables
+
+```bash
+cp .env.example .env
+#edit .env to fit your needs
+```
+
+#### API URL
+
+https://drive.google.com/drive/folders/1GaCmqB4adIcOUC280A_WoShsBqq1dYYK
+
+#### Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-## Type Support for `.vue` Imports in TS
+#### Type Support for `.vue` Imports in TS
 
 TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
 
@@ -17,28 +30,24 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
    2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
 2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
 
-## Customize configuration
+#### Customize configuration
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
 
-## Project Setup
+##### Project Setup
 
-```sh
+```bash
 npm install
 ```
 
-## API URL
+##### Compile and Hot-Reload for Development
 
-https://drive.google.com/drive/folders/1GaCmqB4adIcOUC280A_WoShsBqq1dYYK
-
-### Compile and Hot-Reload for Development
-
-```sh
+```bash
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+###### Type-Check, Compile and Minify for Production
 
-```sh
+```bash
 npm run build
 ```
