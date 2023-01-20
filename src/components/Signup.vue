@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import { ref, onUpdated } from "vue";
+import { ref } from "vue";
 import { AuthService } from "@/services";
 import { TextField, Button, Spinner } from "@/components";
 import router from "@/router";
@@ -11,13 +11,14 @@ const handleClick = async (event: MouseEvent) => {
   event.preventDefault();
   if (!!email.value && !!password.value) {
     isLoading.value = true;
-    const { login } = authService;
-    const response = await login(email.value, password.value);
+    const { signup } = authService;
+    const response = await signup(email.value, password.value);
     isLoading.value = false;
     if (!response.success) {
-      loginError.value = response.error;
-    } else {
-      router.push("dashboard");
+      signupError.value = response.error;
+    }
+    if (response.success) {
+      router.push({ name: "dashboard", replace: true });
     }
   }
 };
@@ -25,13 +26,13 @@ const handleClick = async (event: MouseEvent) => {
 const isLoading = ref<boolean>(false);
 const email = ref<string>("");
 const password = ref<string>("");
-const loginError = ref<any>(null);
+const signupError = ref<any>(null);
 </script>
 
 <template>
-  <div class="Login">
-    <h1>Login</h1>
-    <form class="Login__form">
+  <div class="Signup">
+    <h1>Signup</h1>
+    <form class="Signup__form">
       <label>
         Email
         <TextField v-model="email" required />
@@ -42,12 +43,12 @@ const loginError = ref<any>(null);
         <TextField v-model="password" required type="password" />
       </label>
 
-      <Button label="Login" @click="handleClick" />
-      <p class="Login__textError" v-if="loginError">{{ loginError }}</p>
+      <Button label="Signup" @click="handleClick" />
+      <p class="Signup__textError" v-if="signupError">{{ signupError }}</p>
 
       <div>
         <p>Don't have an account?</p>
-        <router-link to="/signup">Register</router-link>
+        <router-link to="/login">Login</router-link>
       </div>
     </form>
   </div>
@@ -58,7 +59,7 @@ const loginError = ref<any>(null);
 @import "@/assets/sass/boxShadow.scss";
 @import "@/assets/sass/colors.scss";
 
-.Login {
+.Signup {
   width: 100%;
   height: 100vh;
   display: flex;

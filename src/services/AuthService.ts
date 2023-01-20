@@ -7,19 +7,20 @@ import {
 import type { IUser } from "../typescript";
 
 class AuthService {
-  url = API_URL as RequestInfo;
-  token = API_TOKEN as string;
+  url = API_URL;
+  private token = API_TOKEN as string;
+  headers = {
+    "Content-Type": "application/json",
+    Authorization: this.token,
+  };
 
   constructor() {}
 
-  async signup(email: string, password: string) {
+  signup = async (email: string, password: string) => {
     try {
       const response = await fetch(`${this.url}users/signupWithPassword`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: this.token,
-        },
+        headers: this.headers,
         body: JSON.stringify({ email, password, username: email }),
       });
 
@@ -35,18 +36,15 @@ class AuthService {
 
       return { success: true };
     } catch (error) {
-      return { succes: false, error };
+      return { success: false, error };
     }
-  }
+  };
 
-  async login(email: string, password: string) {
+  login = async (email: string, password: string) => {
     try {
       const response = await fetch(`${this.url}users/loginWithPassword`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: this.token,
-        },
+        headers: this.headers,
         body: JSON.stringify({ email, password }),
       });
 
@@ -63,7 +61,7 @@ class AuthService {
     } catch (error) {
       return { success: false, error };
     }
-  }
+  };
 
   logout(): void | string {
     const userToken = localStorage.getItem(LOCALSTORAGE_ITEM_NAME);
@@ -73,7 +71,7 @@ class AuthService {
     localStorage.removeItem(LOCALSTORAGE_ITEM_NAME);
   }
 
-  async authenticate() {
+  authenticate = async () => {
     try {
       const userToken = localStorage.getItem(LOCALSTORAGE_ITEM_NAME);
 
@@ -81,11 +79,8 @@ class AuthService {
 
       const response = await fetch(`${this.url}users/authenticate`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: this.token,
-        },
-        body: JSON.stringify({ toker: userToken }),
+        headers: this.headers,
+        body: JSON.stringify({ token: userToken }),
       });
 
       if (!response.ok) throw new Error(response.statusText);
@@ -96,12 +91,14 @@ class AuthService {
 
       const user = json.data as IUser;
       localStorage.setItem("todo_token", user.token);
+      localStorage.setItem("userId", user.user._id);
+      localStorage.setItem("userEmail", user.user.email);
 
       return { success: true, user };
     } catch (error) {
       return { success: false, error };
     }
-  }
+  };
 }
 
 export default AuthService;
