@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button, Checkbox, TextField } from "@/components";
 import { DocumentPlusIcon, XMarkIcon } from "@heroicons/vue/24/solid";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import DatePicker from "@vuepic/vue-datepicker";
 import { ToDoService } from "@/services";
@@ -76,7 +76,8 @@ const errorTitleIsRequired = ref<boolean>(false);
           <QuillEditor
             placeholder="Description"
             theme="snow"
-            v-model="description"
+            v-model:content="description"
+            content-type="text"
             style="
                {
                 height: 4rem;

@@ -48,7 +48,6 @@ watch(
 const handleOnDelete = async () => {
   if (todo.value) {
     isLoading.value = true;
-    console.log(todo.value._id);
     await todoService.deleteTodo(todo.value._id);
     await router.push({ name: "dashboard" });
   }
@@ -65,11 +64,13 @@ const handleOnClose = async () => {
   <div v-if="todo" class="todo">
     <div class="todo__header">
       <h2>{{ todo.title }}</h2>
-      <Button label="" :icon="XMarkIcon"></Button>
+      <Button label="" :icon="XMarkIcon" @click="handleOnClose"></Button>
     </div>
 
     <p class="todo__content"><span>Description: </span>{{ todo.content }}</p>
-    <p class="todo__timeLimit"><span>Time limit:</span> {{ getLocalTime() }}</p>
+    <p v-if="todo.timeLimit" class="todo__timeLimit">
+      <span>Time limit:</span> {{ getLocalTime() }}
+    </p>
     <p :class="`todo__done--${todo.done ? 'done' : 'pending'}`">
       {{ todo.done ? "Done" : "Pending" }}
     </p>

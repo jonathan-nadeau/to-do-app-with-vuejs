@@ -40,18 +40,27 @@ const filters = reactive<Array<{ label: string; isChecked: boolean }>>([
     label: "No time limit",
     isChecked: false,
   },
+  {
+    label: "In time",
+    isChecked: false,
+  },
 ]);
 
 watch(filters, (newFilters) => {
   if (newFilters.every((filter) => !filter.isChecked)) {
-    filteredTodos.value = [];
+    filteredTodos.value = todos.value;
   } else {
     filteredTodos.value = todos.value.filter((todo) => {
       for (const filter of newFilters) {
         if (filter.label === "Done" && filter.isChecked) {
           return todo.done;
         }
-        if (filter.label === "Expired" && filter.isChecked && !todo.done) {
+        if (
+          filter.label === "Expired" &&
+          filter.isChecked &&
+          !todo.done &&
+          todo.timeLimit
+        ) {
           const today = new Date();
           const expirationDate = new Date(todo.timeLimit);
           return expirationDate < today;
@@ -61,6 +70,11 @@ watch(filters, (newFilters) => {
         }
         if (filter.label === "No time limit" && filter.isChecked) {
           return !todo.timeLimit;
+        }
+        if (filter.label === "In time" && filter.isChecked && !todo.done) {
+          const today = new Date();
+          const expirationDate = todo.timeLimit && new Date(todo.timeLimit);
+          return !expirationDate || expirationDate > today;
         }
       }
     });
@@ -74,6 +88,8 @@ watch(
     }
   }
 );
+
+const todosAreFiltered = () => filters.find((filter) => filter.isChecked);
 
 const getTodos = async () => {
   isLoading.value = true;
@@ -152,7 +168,7 @@ const handleCardOnClick = async (todoId: string) => {
       <AddTodo @handle-submit="handleAddTodoOnSubmit" />
     </div>
     <div class="todos">
-      <ul v-if="filteredTodos.length === 0">
+      <ul v-if="!todosAreFiltered()">
         <li v-for="todo in todos">
           <Card
             :todo="todo"
@@ -161,7 +177,7 @@ const handleCardOnClick = async (todoId: string) => {
           />
         </li>
       </ul>
-      <ul v-if="filteredTodos.length > 0">
+      <ul v-if="todosAreFiltered()">
         <li v-for="filteredTodo in filteredTodos">
           <Card
             :todo="filteredTodo"

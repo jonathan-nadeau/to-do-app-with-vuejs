@@ -42,7 +42,7 @@ const date = ref<string>(
         <CheckCircleIcon class="checkmark" />
       </button>
     </p>
-    <p :class="`time ${isExpired() ? 'expired' : ''}`">
+    <p v-if="todo.timeLimit" :class="`time ${isExpired() ? 'expired' : ''}`">
       Time limit : {{ date }}
     </p>
   </div>
