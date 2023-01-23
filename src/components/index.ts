@@ -5,3 +5,6 @@ export { default as Button } from "./Button.vue";
 export { default as Spinner } from "./Spinner.vue";
 export { default as Dashboard } from "./Dashboard.vue";
 export { default as Card } from "./Card.vue";
+export { default as AddTodo } from "./AddTodo.vue";
+export { default as Checkbox } from "./Checkbox.vue";
+export { default as Todo } from "./Todo.vue";

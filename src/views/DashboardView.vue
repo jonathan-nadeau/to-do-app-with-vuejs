@@ -31,7 +31,8 @@ nav {
   width: 100%;
   padding: 2rem 1rem;
   background-color: #fff;
-  @include boxShadow;
+  z-index: 999;
+  @include boxShadowLight;
 }
 
 button {
@@ -40,9 +41,5 @@ button {
   background-color: $indigo500;
   padding: 1rem;
   border-radius: 0.25rem;
-
-  &:hover {
-    background-color: $indigo700;
-  }
 }
 </style>

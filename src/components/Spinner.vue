@@ -11,12 +11,13 @@
 @import "@/assets/sass/colors.scss";
 
 .spinnerContainer {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
   background-color: rgba($grey500, 0.6);
+  overflow: hidden;
 }
 .lds-ripple {
   display: inline-block;
@@ -29,7 +30,7 @@
 }
 .lds-ripple div {
   position: absolute;
-  border: 4px solid #fff;
+  border: 4px solid $grey900;
   opacity: 1;
   border-radius: 50%;
   animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;

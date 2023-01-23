@@ -52,13 +52,18 @@ const signupError = ref<any>(null);
       </div>
     </form>
   </div>
-  <Spinner v-if="isLoading" />
+  <div class="spinner" v-if="isLoading">
+    <Spinner />
+  </div>
 </template>
 
 <style scoped lang="scss">
 @import "@/assets/sass/boxShadow.scss";
 @import "@/assets/sass/colors.scss";
 
+.spinner {
+  height: 100vh;
+}
 .Signup {
   width: 100%;
   height: 100vh;
