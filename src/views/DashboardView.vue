@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 
 const userEmail = localStorage.getItem("userEmail") || "";
 const router = useRouter();
-const authService = new AuthService();
+const authService = AuthService;
 
 const handleOnClick = () => {
   authService.logout();

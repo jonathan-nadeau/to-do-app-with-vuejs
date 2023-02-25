@@ -4,7 +4,7 @@ import {
   LOCALSTORAGE_ITEM_NAME,
   NO_USER_CONNECTED_ERROR_MESSAGE,
 } from "@/constants";
-import type { IUser } from "../typescript";
+import type { IUser } from "../../typescript";
 
 class AuthService {
   url = API_URL;
@@ -13,6 +13,15 @@ class AuthService {
     "Content-Type": "application/json",
     Authorization: this.token,
   };
+
+  static instance: AuthService | null = null;
+
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new this();
+    }
+    return this.instance;
+  }
 
   constructor() {}
 
@@ -101,4 +110,4 @@ class AuthService {
   };
 }
 
-export default AuthService;
+export default AuthService.getInstance();

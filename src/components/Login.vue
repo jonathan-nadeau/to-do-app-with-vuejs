@@ -5,7 +5,7 @@ import { AuthService } from "@/services";
 import { TextField, Button, Spinner } from "@/components";
 import router from "@/router";
 
-const authService = new AuthService();
+const authService = AuthService;
 
 const handleClick = async (event: MouseEvent) => {
   event.preventDefault();
