@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from "vue";
-import { ToDoService } from "@/services";
+import { ToDoService, FilterService } from "@/services";
 import type { ITodo } from "@/typescript/interfaces/ITodo";
 import { Card, Spinner, AddTodo, Checkbox, Todo } from "@/components";
 import { useRoute, useRouter } from "vue-router";
@@ -23,30 +23,14 @@ const isLoading = ref<boolean>(false);
 const todos = ref<ITodo[]>([]);
 const filteredTodos = ref<ITodo[]>([]);
 const detailedTodoIsShown = ref<boolean>(false);
-const filters = reactive<Array<{ label: string; isChecked: boolean }>>([
-  {
-    label: "Done",
-    isChecked: false,
-  },
-  {
-    label: "Expired",
-    isChecked: false,
-  },
-  {
-    label: "To do",
-    isChecked: false,
-  },
-  {
-    label: "No time limit",
-    isChecked: false,
-  },
-  {
-    label: "In time",
-    isChecked: false,
-  },
-]);
+const filters = FilterService.Builder.withLabel("Done")
+  .withLabel("Expired")
+  .withLabel("To do")
+  .withLabel("No time limit")
+  .withLabel("In time")
+  .build();
 
-watch(filters, (newFilters) => {
+watch(filters.filters, (newFilters) => {
   if (newFilters.every((filter) => !filter.isChecked)) {
     filteredTodos.value = todos.value;
   } else {
@@ -89,7 +73,8 @@ watch(
   }
 );
 
-const todosAreFiltered = () => filters.find((filter) => filter.isChecked);
+const todosAreFiltered = () =>
+  filters.filters.find((filter) => filter.isChecked);
 
 const getTodos = async () => {
   isLoading.value = true;
@@ -161,7 +146,7 @@ const handleCardOnClick = async (todoId: string) => {
   <section v-if="!isLoading">
     <div class="row">
       <div class="inputWrapper">
-        <template v-for="filter in filters">
+        <template v-for="filter in filters.filters">
           <Checkbox v-model="filter.isChecked" :label="filter.label" />
         </template>
       </div>

@@ -4,7 +4,8 @@ import {
   LOCALSTORAGE_ITEM_NAME,
   NO_USER_CONNECTED_ERROR_MESSAGE,
 } from "@/constants";
-import type { IUser } from "../../typescript";
+import type { IUser, IUserRaw } from "../../typescript";
+import AuthAdapter from "./AuthAdapter";
 
 class AuthService {
   url = API_URL;
@@ -23,7 +24,7 @@ class AuthService {
     return this.instance;
   }
 
-  constructor() {}
+  constructor(private authAdapter = new AuthAdapter()) {}
 
   signup = async (email: string, password: string) => {
     try {
@@ -39,7 +40,7 @@ class AuthService {
 
       if (!json.success) throw new Error(json.errors[0].message);
 
-      const user = json.data as IUser;
+      const user = this.authAdapter.formatUser(json.data as IUserRaw);
 
       localStorage.setItem(LOCALSTORAGE_ITEM_NAME, user.token);
 
@@ -62,7 +63,8 @@ class AuthService {
       const json = await response.json();
 
       if (!json.success) throw new Error(json.errors[0].message);
-      const user = json.data as IUser;
+
+      const user = this.authAdapter.formatUser(json.data as IUserRaw);
 
       localStorage.setItem(LOCALSTORAGE_ITEM_NAME, user.token);
 
@@ -98,7 +100,8 @@ class AuthService {
 
       if (!json.success) throw new Error(json.errors[0].message);
 
-      const user = json.data as IUser;
+      const user = this.authAdapter.formatUser(json.data as IUserRaw);
+
       localStorage.setItem("todo_token", user.token);
       localStorage.setItem("userId", user.user._id);
       localStorage.setItem("userEmail", user.user.email);

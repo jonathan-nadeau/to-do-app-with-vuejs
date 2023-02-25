@@ -1,4 +1,4 @@
-export interface IUser {
+export interface IUserRaw {
   token: string;
   user: {
     _id: string;
@@ -17,5 +17,13 @@ export interface IUser {
     authToken: string;
     username: string;
     password: string;
+  };
+}
+
+export interface IUser {
+  token: string;
+  user: {
+    _id: string;
+    email: string;
   };
 }
