@@ -7,8 +7,6 @@ import DatePicker from "@vuepic/vue-datepicker";
 import { ToDoService } from "@/services";
 import type { ITodo } from "@/typescript/interfaces/ITodo";
 
-const todoService = new ToDoService();
-
 const handleAddTodo = () => {
   modalIsOpen.value = true;
 };

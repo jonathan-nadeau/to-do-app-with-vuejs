@@ -4,132 +4,142 @@ import { ToDoService, FilterService } from "@/services";
 import type { ITodo } from "@/typescript/interfaces/ITodo";
 import { Card, Spinner, AddTodo, Checkbox, Todo } from "@/components";
 import { useRoute, useRouter } from "vue-router";
+import { sortTodos } from "@/utils";
 
+/**
+ * Service, hooks
+ */
 const toDoService = new ToDoService();
 const router = useRouter();
 const route = useRoute();
+/**
+ * Lifecycle function
+ */
 
-onMounted(() => {
+onMounted(async () => {
   const todoIdParams = route.query.id;
+
   if (todoIdParams) {
     detailedTodoIsShown.value = true;
   }
-});
-onMounted(async () => {
+
   await getTodos();
 });
 
+/**
+ * State
+ */
 const isLoading = ref<boolean>(false);
+const isFiltered = ref<boolean>(false);
 const todos = ref<ITodo[]>([]);
 const filteredTodos = ref<ITodo[]>([]);
 const detailedTodoIsShown = ref<boolean>(false);
-const filters = FilterService.Builder.withLabel("Done")
-  .withLabel("Expired")
-  .withLabel("To do")
-  .withLabel("No time limit")
-  .withLabel("In time")
-  .build();
+const filters = reactive<
+  Array<{
+    label: "Done" | "Expired" | "To do" | "No time limit" | "In time";
+    isChecked: boolean;
+  }>
+>(
+  FilterService.Builder.withLabel("Done")
+    .withLabel("Expired")
+    .withLabel("To do")
+    .withLabel("No time limit")
+    .withLabel("In time")
+    .build().filters
+);
 
-watch(filters.filters, (newFilters) => {
-  if (newFilters.every((filter) => !filter.isChecked)) {
-    filteredTodos.value = todos.value;
+/**
+ * Watchers
+ */
+
+watch(filters, () => {
+  if (filters.find((filter) => filter.isChecked)) {
+    isFiltered.value = true;
   } else {
-    filteredTodos.value = todos.value.filter((todo) => {
-      for (const filter of newFilters) {
-        if (filter.label === "Done" && filter.isChecked) {
-          return todo.done;
-        }
-        if (
-          filter.label === "Expired" &&
-          filter.isChecked &&
-          !todo.done &&
-          todo.timeLimit
-        ) {
-          const today = new Date();
-          const expirationDate = new Date(todo.timeLimit);
-          return expirationDate < today;
-        }
-        if (filter.label === "To do" && filter.isChecked) {
-          return !todo.done;
-        }
-        if (filter.label === "No time limit" && filter.isChecked) {
-          return !todo.timeLimit;
-        }
-        if (filter.label === "In time" && filter.isChecked && !todo.done) {
-          const today = new Date();
-          const expirationDate = todo.timeLimit && new Date(todo.timeLimit);
-          return !expirationDate || expirationDate > today;
-        }
-      }
-    });
+    isFiltered.value = false;
   }
+
+  filters.forEach((filter) => {
+    if (filter.isChecked) {
+      filteredTodos.value = todos.value.filter((todo) => {
+        if (filter.label === "Done") return todo.done;
+        if (filter.label === "To do") return !todo.done;
+        if (filter.label === "No time limit") return !todo.timeLimit;
+        if (filter.label === "Expired") {
+          const todoDate = new Date(todo.timeLimit);
+          const currentDate = new Date();
+          todoDate.setHours(0, 0, 0, 0);
+          currentDate.setHours(0, 0, 0, 0);
+          return todoDate < currentDate;
+        }
+        if (filter.label === "In time") {
+          const todoDate = new Date(todo.timeLimit);
+          const currentDate = new Date();
+          todoDate.setHours(0, 0, 0, 0);
+          currentDate.setHours(0, 0, 0, 0);
+          return todoDate > currentDate && !todo.done;
+        }
+      });
+    }
+  });
 });
 watch(
   () => route.query.id,
   async (newId) => {
     if (!newId) {
-      await getTodos();
+      detailedTodoIsShown.value = false;
+    }
+    if (newId) {
+      toDoService.getTodoById(newId.toString());
     }
   }
 );
 
-const todosAreFiltered = () =>
-  filters.filters.find((filter) => filter.isChecked);
+/**
+ * Subscribers
+ */
 
-const getTodos = async () => {
-  isLoading.value = true;
-  const response = await toDoService.getTodos();
-
-  if (response.success && response.todos) {
-    const data: ITodo[] = response.todos;
-    data.sort((a, b) => {
-      const valueA = a.done ? 1 : 0;
-      const valueB = b.done ? 1 : 0;
-      return valueA - valueB;
-    });
-    todos.value = data;
+toDoService.observer.subscribe(
+  toDoService.events.onGetTodos,
+  (response: { success: boolean; todos: ITodo[] }) => {
+    if (response.success) {
+      todos.value = sortTodos(response.todos);
+    }
   }
-  isLoading.value = false;
-};
+);
 
+toDoService.observer.subscribe(
+  toDoService.events.onUpdateTodo,
+  (response: { success: boolean; todo: ITodo }) => {
+    if (response.success) {
+      toDoService.getTodos();
+    }
+  }
+);
+
+toDoService.observer.subscribe(
+  toDoService.events.onAddTodo,
+  (response: { success: boolean; todo: ITodo }) => {
+    if (response.success) {
+      toDoService.getTodos();
+    }
+  }
+);
+
+/**
+ * Event handlers
+ */
 const handleAddTodoOnSubmit = async (todo: Partial<ITodo>) => {
   isLoading.value = true;
-
-  const addResponse = await toDoService.addTodo(todo);
-
-  if (addResponse.success) {
-    const getResponse = await toDoService.getTodos();
-
-    if (getResponse.success) {
-      const data = getResponse.todos.sort((a: ITodo, b: ITodo) => {
-        const valueA = a.done ? 1 : 0;
-        const valueB = b.done ? 1 : 0;
-        return valueA - valueB;
-      });
-      todos.value = data;
-    }
-  }
+  await toDoService.addTodo(todo);
   isLoading.value = false;
 };
-const handleCardButtonOnClick = async (todo: ITodo) => {
-  isLoading.value = true;
-  if (todo) {
-    const updateResponse = await toDoService.updateTodo(todo._id, {
-      done: !todo.done,
-    });
 
-    if (updateResponse.success) {
-      const getResponse = await toDoService.getTodos();
-      if (getResponse.success) {
-        const data = getResponse.todos.sort((a: ITodo, b: ITodo) => {
-          const valueA = a.done ? 1 : 0;
-          const valueB = b.done ? 1 : 0;
-          return valueA - valueB;
-        });
-        todos.value = data;
-      }
-    }
-  }
+const cardButtonOnClick = async (todo: ITodo) => {
+  isLoading.value = true;
+  await toDoService.updateTodo(todo._id, {
+    done: !todo.done,
+  });
   isLoading.value = false;
 };
 
@@ -137,6 +147,16 @@ const handleCardOnClick = async (todoId: string) => {
   await router.push({ query: { id: todoId } });
   detailedTodoIsShown.value = true;
 };
+
+const getTodos = async () => {
+  isLoading.value = true;
+  await toDoService.getTodos();
+  isLoading.value = false;
+};
+
+/**
+ * Utils
+ */
 </script>
 
 <template>
@@ -146,27 +166,27 @@ const handleCardOnClick = async (todoId: string) => {
   <section v-if="!isLoading">
     <div class="row">
       <div class="inputWrapper">
-        <template v-for="filter in filters.filters">
+        <template v-for="filter in filters">
           <Checkbox v-model="filter.isChecked" :label="filter.label" />
         </template>
       </div>
       <AddTodo @handle-submit="handleAddTodoOnSubmit" />
     </div>
     <div class="todos">
-      <ul v-if="!todosAreFiltered()">
+      <ul v-if="!isFiltered">
         <li v-for="todo in todos">
           <Card
             :todo="todo"
-            @button-on-click="handleCardButtonOnClick"
+            @button-on-click="cardButtonOnClick(todo)"
             @card-on-click="handleCardOnClick"
           />
         </li>
       </ul>
-      <ul v-if="todosAreFiltered()">
+      <ul v-if="isFiltered">
         <li v-for="filteredTodo in filteredTodos">
           <Card
             :todo="filteredTodo"
-            @button-on-click="handleCardButtonOnClick"
+            @button-on-click="cardButtonOnClick(filteredTodo)"
             @card-on-click="handleCardOnClick"
           />
         </li>

@@ -14,7 +14,8 @@ const emit = defineEmits<{
 }>();
 
 /** Event handlers */
-const buttonOnClick = () => {
+const buttonOnClick = (event: MouseEvent) => {
+  event.stopPropagation();
   emit("buttonOnClick", todo);
 };
 const cardOnClick = () => {

@@ -1,10 +1,12 @@
 class FilterService {
   public filters: Array<{
-    label: string;
+    label: "Done" | "Expired" | "To do" | "No time limit" | "In time";
     isChecked: boolean;
   }> = [];
 
-  constructor(filters: Set<string>) {
+  constructor(
+    filters: Set<"Done" | "Expired" | "To do" | "No time limit" | "In time">
+  ) {
     filters.forEach((filter) => {
       this.filters.push({
         label: filter,
@@ -14,9 +16,13 @@ class FilterService {
   }
 
   static Builder = class {
-    static filters: Set<string> = new Set();
+    static filters: Set<
+      "Done" | "Expired" | "To do" | "No time limit" | "In time"
+    > = new Set();
 
-    static withLabel(filter: string) {
+    static withLabel(
+      filter: "Done" | "Expired" | "To do" | "No time limit" | "In time"
+    ) {
       this.filters.add(filter);
       return this;
     }

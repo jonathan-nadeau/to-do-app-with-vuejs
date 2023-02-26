@@ -19,9 +19,8 @@ const isLoading = ref<boolean>(false);
 
 const getTodo = async () => {
   isLoading.value = true;
-  const response = await todoService.getTodoById(route.query.id as string);
-  if (response.success && response.todo) {
-    todo.value = response.todo;
+  if (route.query.id) {
+    await todoService.getTodoById(route.query.id.toString());
   }
 
   isLoading.value = false;
@@ -45,11 +44,32 @@ watch(
   }
 );
 
+todoService.observer.subscribe(
+  todoService.events.onGetTodoById,
+  (response: { success: boolean; todo: ITodo }) => {
+    if (response.success) {
+      todo.value = response.todo;
+    }
+  }
+);
+
+todoService.observer.subscribe(
+  todoService.events.onDeleteTodo,
+  async (response: { success: boolean }) => {
+    if (response.success) {
+      isLoading.value = true;
+      await todoService.getTodos();
+      isLoading.value = false;
+    }
+  }
+);
+
 const handleOnDelete = async () => {
   if (todo.value) {
     isLoading.value = true;
     await todoService.deleteTodo(todo.value._id);
     await router.push({ name: "dashboard" });
+    isLoading.value = false;
   }
 };
 
@@ -97,6 +117,7 @@ const handleOnClose = async () => {
   display: flex;
   flex-direction: column;
   row-gap: 1rem;
+  width: 350px;
 
   &__header {
     display: flex;
